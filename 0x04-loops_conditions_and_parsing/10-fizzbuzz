@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #Displays number from 0 to 100
 #Displays FizzBuzz when number is a multiple of 3 and 5
 #Displays Fizz when number is a multiple of 3
