@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#Displays Best School 10x but in the 9 iteration adds Hi on a newline
+
+counter=0
+
+while [ $counter -lt 10 ]
+do
+  if [ $counter -eq 9 ]
+  then
+    echo "Hi"
+  fi
+  echo "Best School"
+  ((counter++))
+done
+ 
