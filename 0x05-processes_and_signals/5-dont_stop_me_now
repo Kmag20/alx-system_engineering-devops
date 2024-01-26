@@ -2,4 +2,4 @@
 # A script that kills another program
 
 pid = $(pgrep -f 4-to_infinity_and_beyond)
-kill -15 "$pid"
+kill "$pid"
