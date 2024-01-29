@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# A bash scripts that prints the number of times an IP has occurred
+
+awk '{print $1, $9}' apache-access.log | sort | uniq -c | sort -nr
