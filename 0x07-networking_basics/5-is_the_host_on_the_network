@@ -3,4 +3,4 @@
 
 if [[ -n $1 ]]; then
 	ping -5 $1
-
+fi
