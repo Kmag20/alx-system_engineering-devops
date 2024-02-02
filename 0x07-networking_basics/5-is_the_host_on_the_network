@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bash script that pings an IP addr passed as an argument
 
-if [[ -n $1  && S1 =~ ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$ ]]
+if [[ $1 =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
 then
   ping -c 5 $1
 else
