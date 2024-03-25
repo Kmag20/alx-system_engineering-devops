@@ -4,4 +4,4 @@ server="100.25.152.228"
 private_key="~/.ssh/school"
 user="ubuntu"
 
-ssh -i $private_key $user
+ssh -i "$private_key" "$user"
