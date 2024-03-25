@@ -1,41 +1,196 @@
-# Learning Puppet and Configuration Management
+# 0x0A. Configuration management with Puppet
 
-## Introduction
-Welcome to the "Learning Puppet and Configuration Management" repository! This repository serves as a resource for individuals interested in learning about Puppet, a popular configuration management tool, and the principles of configuration management.
+## Background Context
 
-## Contents
-- [Introduction to Puppet](#introduction-to-puppet)
-- [Getting Started](#getting-started)
-- [Repository Structure](#repository-structure)
-- [Contributing](#contributing)
-- [Resources](#resources)
+[![](https://s3.amazonaws.com/alx-intranet.hbtn.io/uploads/medias/2019/6/6a0a8024f2b1c47a9d1e.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIARDDGGGOUSBVO6H7D%2F20240322%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240322T092926Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=f67a5298fbd0bf2ea09fec1d9257d98e9619bef819050ab8ecdb0a43f1e4c274)](https://youtu.be/ogYLFyp68cI)
 
-## Introduction to Puppet
-[Puppet](https://puppet.com/) is an open-source configuration management tool that automates the provisioning, configuration, and management of IT infrastructure. It allows you to define the desired state of your systems in code and ensures that they remain in that state, reducing manual effort and improving consistency and reliability.
+When I was working for SlideShare, I worked on an auto-remediation tool called  [Skynet](https://intranet.alxswe.com/rltoken/0zbIzBqH_ktMmRQvJwZs2A "Skynet")  that monitored, scaled and fixed Cloud infrastructure. I was using a parallel job-execution system called MCollective that allowed me to execute commands to one or multiple servers at the same time. I could apply an action to a selected set of servers by applying a filter such as the server’s hostname or any other metadata we had (server type, server environment…). At some point, a bug was present in my code that sent  `nil`  to the filter method.
 
-## Getting Started
-To get started with learning Puppet and configuration management, follow these steps:
+There were 2 pieces of bad news:
 
-1. **Clone the Repository**: Clone this repository to your local machine using the following command:[Configuration Management][]
+1.  When MCollective receives  `nil`  as an argument for its filter method, it takes this to mean ‘all servers’
+2.  The action I sent was to terminate the selected servers
 
-2. **Explore the Contents**: Take a look at the contents of the repository, including example manifests, modules, and documentation.
+I started the parallel job-execution and after some time, I realized that it was taking longer than expected. Looking at logs I realized that I was shutting down SlideShare’s entire document conversion environment. Actually, 75% of all our conversion infrastructure servers had been shut down, resulting in users not able to convert their PDFs, powerpoints, and videos… Pretty bad!
 
-3. **Follow Tutorials**: Check out the tutorials and guides provided in the repository to learn about Puppet's syntax, resources, modules, and best practices.
+Thanks to Puppet, we were able to restore our infrastructure to normal operation in under 1H, pretty impressive. Imagine if we had to do everything manually: launching the servers, configuring and linking them, importing application code, starting every process, and obviously, fixing all the bugs (you should know by now that complicated infrastructure always goes sideways)…
 
-4. **Experiment**: Practice writing Puppet manifests and modules, and experiment with configuring systems using Puppet in a test environment.
+Obviously writing Puppet code for your infrastructure requires an investment of time and energy, but in the long term, it is for sure a must-have.
 
-5. **Join the Community**: Engage with the Puppet community through forums, mailing lists, and social media to ask questions, share experiences, and learn from others.
+![](https://s3.amazonaws.com/intranet-projects-files/holbertonschool-sysadmin_devops/292/4i8il3B.gif)
 
-## Repository Structure
-- **/manifests**: Contains example Puppet manifests demonstrating various configuration tasks.
-- **/modules**: Contains example Puppet modules showcasing reusable configuration patterns.
-- **/docs**: Documentation files providing guidance and tutorials for learning Puppet and configuration management.
-
-## Contributing
-Contributions to this repository are welcome! If you have tutorials, examples, or resources related to Puppet and configuration management that you would like to share, please feel free to submit a pull request.
+That was me ^_^‘:  [https://twitter.com/devopsreact/status/836971570136375296](https://intranet.alxswe.com/rltoken/jIyF-Oa80s40ssG21cyNAg "https://twitter.com/devopsreact/status/836971570136375296")
 
 ## Resources
-- [Puppet Documentation](https://puppet.com/docs/puppet/latest/puppet_index.html): Official documentation for Puppet, including guides, references, and tutorials.
-- [Puppet Forge](https://forge.puppet.com/): Repository of pre-built Puppet modules contributed by the community.
-- [Puppet Community](https://puppet.com/community/): Resources for engaging with the Puppet community, including forums, events, and training.
-- [Configuration Management] 
+
+**Read or watch**:
+
+-   [Intro to Configuration Management](https://intranet.alxswe.com/rltoken/GL30hu-aRcKzPOvK8JO-Bg "Intro to Configuration Management")
+-   [Puppet resource type: file](https://intranet.alxswe.com/rltoken/WON0M4DNRabf88KAG_pDUA "Puppet resource type: file")  (_check “Resource types” for all manifest types in the left menu_)
+-   [Puppet’s Declarative Language: Modeling Instead of Scripting](https://intranet.alxswe.com/rltoken/0V2fBdafkfKPMxA1umea3Q "Puppet's Declarative Language: Modeling Instead of Scripting")
+-   [Puppet lint](https://intranet.alxswe.com/rltoken/CRUMeEMdcX-UtbWsUM9xLQ "Puppet lint")
+-   [Puppet emacs mode](https://intranet.alxswe.com/rltoken/MzHXCntAkPzOqMnI6_rpWQ "Puppet emacs mode")
+
+## Requirements
+
+### General
+
+-   All your files will be interpreted on Ubuntu 20.04 LTS
+-   All your files should end with a new line
+-   A  `README.md`  file at the root of the folder of the project is mandatory
+-   Your Puppet manifests must pass  `puppet-lint`  version 2.1.1 without any errors
+-   Your Puppet manifests must run without error
+-   Your Puppet manifests first line must be a comment explaining what the Puppet manifest is about
+-   Your Puppet manifests files must end with the extension  `.pp`
+
+## Note on Versioning
+
+Your Ubuntu 20.04 VM should have Puppet 5.5 preinstalled.
+
+### Install  `puppet`
+
+```
+$ apt-get install -y ruby=1:2.7+1 --allow-downgrades
+$ apt-get install -y ruby-augeas
+$ apt-get install -y ruby-shadow
+$ apt-get install -y puppet
+
+```
+
+You do  **not**  need to attempt to upgrade versions. This project is simply a set of tasks to familiarize you with the basic level syntax which is virtually identical in newer versions of Puppet.
+
+[Puppet 5 Docs](https://intranet.alxswe.com/rltoken/fsIr2xFkJHTkaXwqZFFcbA "Puppet 5 Docs")
+
+### Install  `puppet-lint`
+
+```
+$ gem install puppet-lint
+
+```
+
+## Tasks
+
+### 0. Create a file
+
+mandatory
+
+Using Puppet, create a file in  `/tmp`.
+
+Requirements:
+
+-   File path is  `/tmp/school`
+-   File permission is  `0744`
+-   File owner is  `www-data`
+-   File group is  `www-data`
+-   File contains  `I love Puppet`
+
+Example:
+
+```
+root@6712bef7a528:~# puppet-lint --version
+puppet-lint 2.5.2
+root@6712bef7a528:~# puppet-lint 0-create_a_file.pp
+root@6712bef7a528:~# 
+root@6712bef7a528:~# puppet apply 0-create_a_file.pp
+Notice: Compiled catalog for 6712bef7a528.ec2.internal in environment production in 0.04 seconds
+Notice: /Stage[main]/Main/File[school]/ensure: defined content as '{md5}f1b70c2a42a98d82224986a612400db9'
+Notice: Finished catalog run in 0.03 seconds
+root@6712bef7a528:~#
+root@6712bef7a528:~# ls -l /tmp/school
+-rwxr--r-- 1 www-data www-data 13 Mar 19 23:12 /tmp/school
+root@6712bef7a528:~# cat /tmp/school
+I love Puppetroot@6712bef7a528:~#
+
+```
+
+**Repo:**
+
+-   GitHub repository:  `alx-system_engineering-devops`
+-   Directory:  `0x0A-configuration_management`
+-   File:  `0-create_a_file.pp`
+
+
+### 1. Install a package
+
+mandatory
+
+Using Puppet, install  `flask`  from  `pip3`.
+
+Requirements:
+
+-   Install  `flask`
+-   Version must be  `2.1.0`
+
+Example:
+
+```
+root@9665f0a47391:/# puppet apply 1-install_a_package.pp
+Notice: Compiled catalog for 9665f0a47391 in environment production in 0.14 seconds
+Notice: /Stage[main]/Main/Package[Flask]/ensure: created
+Notice: Applied catalog in 0.20 seconds
+root@9665f0a47391:/# flask --version
+Python 3.8.10
+Flask 2.1.0
+Werkzeug 2.1.1
+
+```
+
+**Repo:**
+
+-   GitHub repository:  `alx-system_engineering-devops`
+-   Directory:  `0x0A-configuration_management`
+-   File:  `1-install_a_package.pp`
+
+
+### 2. Execute a command
+
+mandatory
+
+Using Puppet, create a manifest that kills a process named  `killmenow`.
+
+Requirements:
+
+-   Must use the  `exec`  Puppet resource
+-   Must use  `pkill`
+
+Example:
+
+Terminal #0 - starting my process
+
+```
+root@d391259bf577:/# cat killmenow
+#!/bin/bash
+while [[ true ]]
+do
+    sleep 2
+done
+
+root@d391259bf577:/# ./killmenow
+
+```
+
+Terminal #1 - executing my manifest
+
+```
+root@d391259bf577:/# puppet apply 2-execute_a_command.pp
+Notice: Compiled catalog for d391259bf577.hsd1.ca.comcast.net in environment production in 0.01 seconds
+Notice: /Stage[main]/Main/Exec[killmenow]/returns: executed successfully
+Notice: Finished catalog run in 0.10 seconds
+root@d391259bf577:/# 
+
+```
+
+Terminal #0 - process has been terminated
+
+```
+root@d391259bf577:/# ./killmenow
+Terminated
+root@d391259bf577:/#
+
+```
+
+**Repo:**
+
+-   GitHub repository:  `alx-system_engineering-devops`
+-   Directory:  `0x0A-configuration_management`
+-   File:  `2-execute_a_command.pp`
