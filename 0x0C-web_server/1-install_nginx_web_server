@@ -1,46 +1,21 @@
 #!/usr/bin/env bash
-# Install nginx on the server
-# It should be listening on port 80
-# When querying Nginx at its root / with a GET req using curl, it should 
-# return a page that contains the string "Hello World!"
+# Installs Nginx with the following configurations:
+#+    Listens on port 80.
+#+    Returns a page containing "Holberton School" when queried
+#++    at the root with a curl GET request.
 
-sudo apt update && sudo apt install nginx -y
+apt-get update
+apt-get install -y nginx
 
-# sudo apt-get update && sudo apt-get install nginx -y
+mkdir /etc/nginx/html
+touch /etc/nginx/html/index.html
+echo "Holberton School" > /etc/nginx/html/index.html
+printf %s "server {
+     listen      80 default_server;
+     listen      [::]:80 default_server;
+     root        /etc/nginx/html;
+     index       index.html index.htm;
+}
+" > /etc/nginx/sites-available/default
 
-# sudo chown -R $USER:$USER /var/www/html/index.nginx-debian.html
-
-# sudo echo "Hello World!" > /var/www/html/index.nginx-debian.html
-
-# sudo service nginx restart
-#!/usr/bin/env bash
-
-# Update package list and install Nginx
-sudo apt-get update
-sudo apt-get install nginx -y
-
-# Create a custom directory for your HTML file
-sudo mkdir -p /var/www/mywebsite
-
-# Create an HTML file with "Hello World!"
-echo "Hello World!" | sudo tee /var/www/mywebsite/index.html
-
-# Configure the default Nginx site to serve from the custom directory
-echo 'server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-
-    root /var/www/mywebsite;
-    index index.html;
-
-    server_name _;
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}' | sudo tee /etc/nginx/sites-available/default
-
-# Restart Nginx using the service command
-sudo service nginx restart
-
-echo "Nginx installation and configuration completed. Nginx is now serving 'Hello World!' on port 80."
+service nginx restart
