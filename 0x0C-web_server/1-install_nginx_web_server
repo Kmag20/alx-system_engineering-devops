@@ -6,21 +6,41 @@
 
 sudo apt update && sudo apt install nginx -y
 
-sudo service start nginx
+# sudo apt-get update && sudo apt-get install nginx -y
 
-sudo ufw allow 'Nginx HTTP'
-sudo CHOWN -R "$USER":"$USER" /var/www/html
-sudo CHMOD -R 755 /var/www
+# sudo chown -R $USER:$USER /var/www/html/index.nginx-debian.html
 
-echo "Hello World!" > /var/www/html/index.nginx-debian.html
-echo "server {
+# sudo echo "Hello World!" > /var/www/html/index.nginx-debian.html
+
+# sudo service nginx restart
+#!/usr/bin/env bash
+
+# Update package list and install Nginx
+sudo apt-get update
+sudo apt-get install nginx -y
+
+# Create a custom directory for your HTML file
+sudo mkdir -p /var/www/mywebsite
+
+# Create an HTML file with "Hello World!"
+echo "Hello World!" | sudo tee /var/www/mywebsite/index.html
+
+# Configure the default Nginx site to serve from the custom directory
+echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
+
+    root /var/www/mywebsite;
+    index index.html;
+
+    server_name _;
 
     location / {
-        echo 'Hello World!';
+        try_files $uri $uri/ =404;
     }
-}" > /etc/nginx/sites-available/default
+}' | sudo tee /etc/nginx/sites-available/default
 
+# Restart Nginx using the service command
+sudo service nginx restart
+
+echo "Nginx installation and configuration completed. Nginx is now serving 'Hello World!' on port 80."
