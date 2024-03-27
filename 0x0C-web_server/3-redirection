@@ -1,22 +1,68 @@
 #!/usr/bin/env bash
-# Configures an Nginx server so that /redirect_me redirects to another page.
-# The redirection is configured as a "301 Moved Permanently"
+# Configure the server so that /redirect-me is redirecting to another page
 
-apt-get update
-apt-get install -y nginx
+# Update package lists
+sudo apt-get update
 
-mkdir /etc/nginx/html
-touch /etc/nginx/html/index.html
-echo "Hello World" > /etc/nginx/html/index.html
-printf %s "server {
-    listen 80;
+# Install Nginx
+sudo apt-get install -y nginx
+
+# Remove the default Nginx configuration file
+rm -f /etc/nginx/sites-available/default
+rm -f /etc/nginx/sites-enabled/default
+
+# Create a new configuration file
+cat > /etc/nginx/sites-available/default.conf << EOF
+server {
+    listen 80 default_server;
     listen [::]:80 default_server;
-    root   /etc/nginx/html;
-    index  index.html index.htm;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
 
     location /redirect_me {
-        return 301 http://cuberule.com/;
+        return 301 https://google.com;
     }
-}" > /etc/nginx/sites-available/default
+}
+EOF
 
-service nginx restart
+# Enable the new configuration file
+ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/
+
+# Create the /var/www/html directory if it doesn't exist
+mkdir -p /var/www/html
+
+# Create the index.html file
+echo "Hello World!" > /var/www/html/index.html
+
+# Restart Nginx
+nginx -s reload
+
+# Check if Nginx is running and listening on port 80
+if sudo lsof -i :80 -sTCP:LISTEN -t >/dev/null; then
+    echo "Nginx is running and listening on port 80."
+else
+    echo "Nginx is not running or not listening on port 80."
+fi
+
+# Verify that Nginx returns "Hello World!" when queried at its root
+response=$(curl -s http://localhost)
+if [ "$response" = "Hello World!" ]; then
+    echo "Nginx is returning 'Hello World!' when queried at its root."
+else
+    echo "Nginx is not returning 'Hello World!' when queried at its root."
+fi
+
+# Check if Nginx returns 301 when querying /redirect_me
+status_code=$(curl -sI http://localhost/redirect_me | grep "HTTP/" | awk '{print $2}')
+if [ "$status_code" = "301" ]; then
+    echo "Your server web01 returns 301 when querying /redirect_me"
+else
+    echo "Your server web01 does not return 301 when querying /redirect_me"
+fi
