@@ -1,35 +1,70 @@
 #!/usr/bin/env bash
-# Installs Nginx with the following configurations:
-#+    Listens on port 80.
-#+    Returns a page containing "Holberton School" when queried
-#+     at the root with a curl GET request.
-# Configures /redirect_me as a "301 Moved Permanently".
-# Includes a custom 404 page containing "Ceci n'est pas une page".
 
-apt-get update
-apt-get install -y nginx
+# Update package lists
+sudo apt-get update
 
-mkdir /etc/nginx/html
-touch /etc/nginx/html/index.html
-echo "Hello World" > /etc/nginx/html/index.html
-touch /etc/nginx/html/404.html
-echo "Ceci n'est pas une page" > /etc/nginx/html/404.html
+# Install Nginx
+sudo apt-get install -y nginx
 
-printf %s "server {
-    listen 80;
+# Remove the default Nginx configuration file
+rm -f /etc/nginx/sites-available/default
+rm -f /etc/nginx/sites-enabled/default
+
+# Create a new configuration file
+cat > /etc/nginx/sites-available/default.conf << EOF
+server {
+    listen 80 default_server;
     listen [::]:80 default_server;
-    root   /etc/nginx/html;
-    index  index.html index.htm;
 
-    location /redirect_me {
-        return 301 http://cuberule.com/;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ =404;
     }
 
     error_page 404 /404.html;
-    location /404 {
-      root /etc/nginx/html;
-      internal;
-    }
-}" > /etc/nginx/sites-available/default
 
-service nginx restart
+    location = /404.html {
+        internal;
+        add_header Content-Type text/html;
+        return 404 "Ceci n'est pas une page";
+    }
+}
+EOF
+
+# Enable the new configuration file
+ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/
+
+# Create the /var/www/html directory if it doesn't exist
+mkdir -p /var/www/html
+
+# Create the index.html file
+echo "Hello World!" > /var/www/html/index.html
+
+# Restart Nginx
+sudo service nginx restart
+# Check if Nginx is running and listening on port 80
+if sudo lsof -i :80 -sTCP:LISTEN -t >/dev/null; then
+    echo "Nginx is running and listening on port 80."
+else
+    echo "Nginx is not running or not listening on port 80."
+fi
+
+# Verify that Nginx returns "Hello World!" when queried at its root
+response=$(curl -s http://localhost)
+if [ "$response" = "Hello World!" ]; then
+    echo "Nginx is returning 'Hello World!' when queried at its root."
+else
+    echo "Nginx is not returning 'Hello World!' when queried at its root."
+fi
+
+# Check if Nginx returns 404 with the custom page when querying a non-existent URI
+response=$(curl -s -I http://localhost/non-existent-page | grep "HTTP/")
+if [[ "$response" == *"404"* && "$response" == *"Ceci n'est pas une page"* ]]; then
+    echo "Your server web01 returns a custom 404 page with the string 'Ceci n'est pas une page'"
+else
+    echo "Your server web01 does not return a custom 404 page with the string 'Ceci n'est pas une page'"
+fi
