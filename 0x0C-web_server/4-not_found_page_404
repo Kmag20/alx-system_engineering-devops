@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Configure nginx server to have a cstom 404 page containing the string 
+# 'Ceci n'est pas une page'.
 
 # Update package lists
 sudo apt-get update
