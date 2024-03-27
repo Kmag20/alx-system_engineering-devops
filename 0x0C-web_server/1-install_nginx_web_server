@@ -38,8 +38,7 @@ mkdir -p /var/www/html
 echo "Hello World!" > /var/www/html/index.html
 
 # Restart Nginx
-nginx -s reload
-
+sudo service nginx restart
 # Check if Nginx is running and listening on port 80
 if sudo lsof -i :80 -sTCP:LISTEN -t >/dev/null; then
     echo "Nginx is running and listening on port 80."
