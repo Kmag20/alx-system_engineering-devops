@@ -1,11 +1,11 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
 # Installs and configures an nginx server
 
 # Update package lists
-apt-get update
+sudo apt-get update
 
 # Install Nginx
-apt-get install -y nginx
+sudo apt-get install -y nginx
 
 # Remove the default Nginx configuration file
 rm -f /etc/nginx/sites-available/default
