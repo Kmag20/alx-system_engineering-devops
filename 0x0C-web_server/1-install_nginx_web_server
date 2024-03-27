@@ -1,21 +1,56 @@
-#!/usr/bin/env bash
-# Installs Nginx with the following configurations:
-#+    Listens on port 80.
-#+    Returns a page containing "Holberton School" when queried
-#++    at the root with a curl GET request.
+#!/bin/bash
+# Installs and configures an nginx server
 
+# Update package lists
 apt-get update
+
+# Install Nginx
 apt-get install -y nginx
 
-mkdir /etc/nginx/html
-touch /etc/nginx/html/index.html
-echo "Best School" > /etc/nginx/html/index.html
-printf %s "server {
-     listen      80 default_server;
-     listen      [::]:80 default_server;
-     root        /etc/nginx/html;
-     index       index.html index.htm;
-}
-" > /etc/nginx/sites-available/default
+# Remove the default Nginx configuration file
+rm -f /etc/nginx/sites-available/default
+rm -f /etc/nginx/sites-enabled/default
 
-service nginx restart
+# Create a new configuration file
+cat > /etc/nginx/sites-available/default.conf << EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF
+
+# Enable the new configuration file
+ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/
+
+# Create the /var/www/html directory if it doesn't exist
+mkdir -p /var/www/html
+
+# Create the index.html file
+echo "Hello World!" > /var/www/html/index.html
+
+# Restart Nginx
+nginx -s reload
+
+# Check if Nginx is running and listening on port 80
+if sudo lsof -i :80 -sTCP:LISTEN -t >/dev/null; then
+    echo "Nginx is running and listening on port 80."
+else
+    echo "Nginx is not running or not listening on port 80."
+fi
+
+# Verify that Nginx returns "Hello World!"
+response=$(curl -s http://localhost)
+if [ "$response" = "Hello World!" ]; then
+    echo "Nginx is returning 'Hello World!' when queried at its root."
+else
+    echo "Nginx is not returning 'Hello World!' when queried at its root."
+fi
