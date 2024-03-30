@@ -42,7 +42,7 @@ server {
 EOF
 
 # Enable the new configuration file
-# ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/
 
 # Create the /var/www/html directory if it doesn't exist
 mkdir -p /var/www/html
