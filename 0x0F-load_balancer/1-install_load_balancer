@@ -48,6 +48,7 @@ defaults
 	errorfile 504 /etc/haproxy/errors/504.http
 frontend http-in
 	bind *:80
+	bind 127.0.0.1:80
         mode http
 	default_backend web-servers
 
@@ -57,9 +58,7 @@ backend web-servers
 	server 518128-web-02 52.87.232.93:80 check
 EOF
 
-sudo systemctl enable haproxy
-sudo systemctl start haproxy
-
+sudo systemctl reload haproxy
 # Check if HAProxy is running
 if sudo systemctl is-active --quiet haproxy; then
     echo "[+] HAProxy is running and can be managed via the init script."
