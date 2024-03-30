@@ -21,7 +21,7 @@ load balancer on to manage both web servers.
     * Requests are distributed using a round-robin algorithm.
 
 * **2. Add a custom HTTP header with Puppet**
-  * [2-puppet_custom_http_response_header.pp]: Puppet script just like 
+  * [2-puppet_custom_http_response_header.pp](2-puppet_custom_http_response_header.pp): Puppet script just like 
   task #0 that automates the task of creating a custom HTTP response
   but with puppet
     * The name of the custom HTTP header must be X-Served-By
