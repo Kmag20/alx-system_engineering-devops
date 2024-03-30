@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Configure nginx on web2, add custom headers on web 1 and 2,
+# the value of is the hostname of the server running Nginx
+# is running on
+
+# Update package lists and install nginx
+sudo apt-get update && sudo apt-get install nginx -y
+
+# Remove the default Nginx config files
+rm -rf /etc/nginx/sites-available/default
+rm -rf /etc/nginx/sites-enabled/default
+
+# Create a new configuration file
+cat > /etc/nginx/sites-available/default.conf << EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    add_header X-Served-By $HOSTNAME;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location /redirect_me {
+        return 301 https://google.com;
+    }
+
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+        add_header Content-Type text/html;
+        return 404 "Ceci n'est pas une page";
+    }
+}
+EOF
+
+# Enable the new configuration file
+# ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/
+
+# Create the /var/www/html directory if it doesn't exist
+mkdir -p /var/www/html
+
+# Create the index.html file
+echo "Hello World!" > /var/www/html/index.html
+
+# Restart Nginx
+sudo service nginx restart
+# Check if Nginx is running and listening on port 80
+if sudo lsof -i :80 -sTCP:LISTEN -t >/dev/null; then
+    echo "[+] Nginx is running and listening on port 80."
+else
+    echo "[-] Nginx is not running or not listening on port 80."
+fi
+
+# Verify that Nginx returns "Hello World!" when queried at its root
+response=$(curl -s http://localhost)
+if [ "$response" = "Hello World!" ]; then
+    echo "[+] Nginx is returning 'Hello World!' when queried at its root."
+else
+    echo "[-] Nginx is not returning 'Hello World!' when queried at its root."
+fi
+
+# Check if Nginx returns 301 when querying /redirect_me
+status_code=$(curl -sI http://localhost/redirect_me | grep "HTTP/" | awk '{print $2}')
+echo $status_code
+if [ "$status_code" = "301" ]; then
+    echo "[+] Your server web01 returns 301 when querying /redirect_me"
+else
+    echo "[-] Your server web01 does not return 301 when querying /redirect_me"
+fi
+
+# Check if Nginx returns 404 with custom page when querying a non-existent URI
+response=$(curl -s -i http://localhost/non-existent-page)
+status_code=$(echo "$response" | grep "HTTP/" | awk '{print $2}')
+if [[ "$status_code" == "404" && "$response" == *"Ceci n'est pas une page"* ]]; then
+    echo "[-] Your server web01 returns a custom 404 page with the string 'Ceci n'est pas une page'"
+else
+    echo "[-] Your server web01 does not return a custom 404 page with the string 'Ceci n'est pas une page'"
+fi
+
