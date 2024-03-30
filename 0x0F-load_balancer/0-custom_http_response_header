@@ -4,7 +4,12 @@
 # is running on
 
 # Update package lists and install nginx
-sudo apt-get update && sudo apt-get install nginx -y
+if ! dpkg -l | grep -q nginx; then
+    echo "[+] Package not installed. Installing..."
+    sudo apt-get update && sudo apt-get install nginx -y
+else
+    echo "[+] Nginx already installed."
+fi
 
 # Remove the default Nginx config files
 rm -rf /etc/nginx/sites-available/default
