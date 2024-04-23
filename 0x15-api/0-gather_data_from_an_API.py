@@ -8,7 +8,7 @@ import sys
 
 
 if __name__ == '__main__':
-    user_id = sys.argv[1]
+    user_id = int(sys.argv[1])
     url = "https://jsonplaceholder.typicode.com/"
     users = requests.get(url + "users/{}".format(user_id)).json()
     params = {"userId": "{}".format(user_id)}
