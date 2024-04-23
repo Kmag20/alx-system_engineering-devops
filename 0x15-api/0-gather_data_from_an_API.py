@@ -13,7 +13,7 @@ if __name__ == '__main__':
     params = {"userId": "{}".format(user_id)}
     todos = requests.get(url + "todos", params=params).json()
     completed_tasks = sum(1 for todo in todos if todo['completed'])
-    print("Employee {} is done with tasks {}/{}:".format(users['name'],
+    print("Employee {} is done with tasks ({}/{}):".format(users['name'],
           completed_tasks, len(todos)))
     for todo in todos:
         if todo['completed'] is True:
