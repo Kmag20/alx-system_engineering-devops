@@ -1,31 +1,33 @@
 #!/usr/bin/python3
-"""
-Function that queries the Reddit API and returns
-the number of subscribers for a given subreddit.
-"""
-import requests
-import sys
 
+"""Function to query subscribers on a given Reddit subreddit."""
 
 import requests
+from urllib.parse import urljoin
+
+BASE_URL = "https://www.reddit.com"
+USER_AGENT = "Mozilla/5.0(by /u/CapillaryMercenary12)"
+
 
 def number_of_subscribers(subreddit):
-    # Reddit API endpoint for subreddit information
-    url = f"https://www.reddit.com/r/{subreddit}/about.json"
-    
-    # Set a custom User-Agent header to avoid being blocked by Reddit
-    headers = {'User-Agent': 'MyBot/1.0'}
-    
-    # Make a GET request to the subreddit endpoint
-    response = requests.get(url, headers=headers, allow_redirects=False)
-    
-    # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        # Parse the JSON response
-        data = response.json()
-        
-        # Extract and return the number of subscribers
-        return data['data']['subscribers']
-    else:
-        # Invalid subreddit or other error, return 0
-        return 0
+    """Return the total number of subscribers on a given subreddit."""
+    url = urljoin(BASE_URL, f"/r/{subreddit}/about.json")
+    headers = {"User-Agent": USER_AGENT}
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        if response.status_code == 404:
+            return 0
+        else:
+            raise err
+
+    data = response.json().get("data")
+    return data.get("subscribers", 0)
+
+
+if __name__ == "__main__":
+    subreddit = input("Enter a subreddit name: ")
+    subscribers = number_of_subscribers(subreddit)
+    print(f"The subreddit /r/{subreddit} has {subscribers} subscribers.")
