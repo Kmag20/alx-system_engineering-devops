@@ -1,33 +1,27 @@
 #!/usr/bin/python3
-
-"""Function to query subscribers on a given Reddit subreddit."""
-
+"""
+Function that queries the Reddit API and returns
+the number of subscribers for a given subreddit.
+"""
 import requests
-from urllib.parse import urljoin
-
-BASE_URL = "https://www.reddit.com"
-USER_AGENT = "Mozilla/5.0(by /u/CapillaryMercenary12)"
+import sys
 
 
 def number_of_subscribers(subreddit):
-    """Return the total number of subscribers on a given subreddit."""
-    url = urljoin(BASE_URL, f"/r/{subreddit}/about.json")
-    headers = {"User-Agent": USER_AGENT}
+    """ Queries to Reddit API """
+    u_agent = 'Mozilla/5.0'
 
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        if response.status_code == 404:
-            return 0
-        else:
-            raise err
+    headers = {
+        'User-Agent': u_agent
+    }
 
-    data = response.json().get("data")
-    return data.get("subscribers", 0)
-
-
-if __name__ == "__main__":
-    subreddit = input("Enter a subreddit name: ")
-    subscribers = number_of_subscribers(subreddit)
-    print(f"The subreddit /r/{subreddit} has {subscribers} subscribers.")
+    url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
+    res = requests.get(url, headers=headers, allow_redirects=False)
+    if res.status_code != 200:
+        return 0
+    dic = res.json()
+    if 'data' not in dic:
+        return 0
+    if 'subscribers' not in dic.get('data'):
+        return 0
+    return res.json()['data']['subscribers']
